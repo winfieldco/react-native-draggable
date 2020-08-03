@@ -1,6 +1,6 @@
 {
   "name": "react-native-draggable",
-  "version": "3.3.0",
+  "version": "3.3.0-post1",
   "description": "draggable",
   "main": "index.js",
   "types": "index.d.ts",
@@ -11,9 +11,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tongyy/react-native-draggable.git"
-  },
-  "dependencies": {
-    "prop-types": "^15.7.2"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.8.3",
