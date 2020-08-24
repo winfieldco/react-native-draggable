@@ -1,5 +1,5 @@
 /**
- *	* https://github.com/tongyy/react-native-draggable
+ *  * https://github.com/tongyy/react-native-draggable
  *
  */
 
@@ -48,6 +48,7 @@ export default function Draggable(props) {
     minY,
     maxX,
     maxY,
+    dragHandle,
   } = props;
 
   // The Animated object housing our xy value so that we can spring back
@@ -133,7 +134,7 @@ export default function Draggable(props) {
         Number.isFinite(maxY) ? maxY - bottom : far,
       );
       pan.current.setValue({x: changeX, y: changeY});
-      onDrag(e, gestureState);
+      onDrag(e, gestureState, startBounds.current, getBounds());
     },
     [maxX, maxY, minX, minY, onDrag],
   );
@@ -212,7 +213,13 @@ export default function Draggable(props) {
 
   const touchableContent = React.useMemo(() => {
     if (children) {
+
+      if(dragHandle) { 
+        return dragHandle.renderChildren(children, {panResponder: panResponder});
+      }
+
       return children;
+
     } else if (imageSource) {
       return (
         <Image
@@ -258,6 +265,28 @@ export default function Draggable(props) {
       />
     );
   }, [maxX, maxY, minX, minY]);
+
+  if(dragHandle) { 
+
+    return (
+      <View pointerEvents="box-none" style={positionCss}>
+        {debug && getDebugView()}
+        <Animated.View
+          pointerEvents="box-none"
+          {...animatedViewProps}          
+          style={pan.current.getLayout()}>
+          <View
+            onLayout={handleOnLayout}
+            style={dragItemCss}
+            disabled={disabled}
+          >
+            {touchableContent}
+          </View>
+        </Animated.View>
+      </View>
+    );
+
+  }
 
   return (
     <View pointerEvents="box-none" style={positionCss}>

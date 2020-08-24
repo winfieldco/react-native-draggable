@@ -1,6 +1,6 @@
 {
   "name": "react-native-draggable",
-  "version": "3.3.0-post1",
+  "version": "3.3.0-post2",
   "description": "draggable",
   "main": "index.js",
   "types": "index.d.ts",
