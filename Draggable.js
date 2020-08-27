@@ -87,21 +87,38 @@ export default function Draggable(props) {
       toValue: newOffset || originalOffset,
       useNativeDriver: false,
     }).start();
-
   }, [pan]);
+
+  // Provide a function that can be passed to callbacks to animate to a specific offset
+  var animateTo = (offset, callback) => {
+    Animated.timing(pan.current, {
+      toValue: offset,
+      useNativeDriver: false,
+    }).start(() => {
+      if(callback) {
+        callback();
+      }
+    });    
+  }
 
   const onPanResponderRelease = React.useCallback(
     (e, gestureState) => {
       isDragging.current = false;
-      if (onDragRelease) {
-        onDragRelease(e, gestureState, getBounds());
-        onRelease(e, true);
-      }
       if (!shouldReverse) {
-        pan.current.flattenOffset();
+        pan.current.flattenOffset();     
       } else {
         reversePosition();
       }
+
+      // Must be placed below the flatten offset, otherwise animateTo will cause jumping as it will
+      // animate but then flatten immediately during the animation
+      if (onDragRelease) {
+        onDragRelease(e, gestureState, startBounds.current, getBounds(), {
+          animateTo: animateTo
+        });
+        onRelease(e, true);
+      }
+
     },
     [onDragRelease, shouldReverse, onRelease, reversePosition, getBounds],
   );
@@ -134,7 +151,9 @@ export default function Draggable(props) {
         Number.isFinite(maxY) ? maxY - bottom : far,
       );
       pan.current.setValue({x: changeX, y: changeY});
-      onDrag(e, gestureState, startBounds.current, getBounds());
+      onDrag(e, gestureState, startBounds.current, getBounds(), {
+        animateTo: animateTo
+      });
     },
     [maxX, maxY, minX, minY, onDrag],
   );
@@ -163,9 +182,11 @@ export default function Draggable(props) {
   React.useEffect(() => {
     const curPan = pan.current; // Using an instance to avoid losing the pointer before the cleanup
     if (!shouldReverse) {
-      curPan.addListener((c) => (offsetFromStart.current = c));
+      curPan.addListener((c) => {
+        offsetFromStart.current = c;
+      });
     } else {
-        reversePosition();
+      reversePosition();
     }
     return () => {
       curPan.removeAllListeners();
@@ -362,6 +383,9 @@ Draggable.propTypes = {
   minY: PropTypes.number,
   maxX: PropTypes.number,
   maxY: PropTypes.number,
+  dragHandle: React.PropTypes.shape({
+    renderChildren: React.PropTypes.func,
+  }),
 };
 
 const styles = StyleSheet.create({
