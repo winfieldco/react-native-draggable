@@ -49,6 +49,7 @@ export default function Draggable(props) {
     maxX,
     maxY,
     dragHandle,
+    afterRender,
   } = props;
 
   // The Animated object housing our xy value so that we can spring back
@@ -113,9 +114,7 @@ export default function Draggable(props) {
       // Must be placed below the flatten offset, otherwise animateTo will cause jumping as it will
       // animate but then flatten immediately during the animation
       if (onDragRelease) {
-        onDragRelease(e, gestureState, startBounds.current, getBounds(), {
-          animateTo: animateTo
-        });
+        onDragRelease(e, gestureState, startBounds.current, getBounds());
         onRelease(e, true);
       }
 
@@ -151,9 +150,7 @@ export default function Draggable(props) {
         Number.isFinite(maxY) ? maxY - bottom : far,
       );
       pan.current.setValue({x: changeX, y: changeY});
-      onDrag(e, gestureState, startBounds.current, getBounds(), {
-        animateTo: animateTo
-      });
+      onDrag(e, gestureState, startBounds.current, getBounds());
     },
     [maxX, maxY, minX, minY, onDrag],
   );
@@ -180,6 +177,11 @@ export default function Draggable(props) {
 
   // TODO Figure out a way to destroy and remove offsetFromStart entirely
   React.useEffect(() => {
+
+    if(afterRender) {
+      afterRender({animateTo: animateTo});
+    }
+
     const curPan = pan.current; // Using an instance to avoid losing the pointer before the cleanup
     if (!shouldReverse) {
       curPan.addListener((c) => {
@@ -386,6 +388,7 @@ Draggable.propTypes = {
   dragHandle: React.PropTypes.shape({
     renderChildren: React.PropTypes.func,
   }),
+  afterRender: PropTypes.func,
 };
 
 const styles = StyleSheet.create({
