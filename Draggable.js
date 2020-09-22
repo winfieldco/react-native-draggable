@@ -92,13 +92,9 @@ export default function Draggable(props) {
 
   // Provide a function that can be passed to callbacks to animate to a specific offset
   var animateTo = (offset, callback) => {
-    Animated.spring(pan.current, {
+    Animated.timing(pan.current, {
       toValue: offset,
       useNativeDriver: false,
-
-      // Allows subsequent animations to run quickly afterwards
-      restDisplacementThreshold: 1,
-      restSpeedThreshold: 1,
       
     }).start(() => {
       if(callback) {
